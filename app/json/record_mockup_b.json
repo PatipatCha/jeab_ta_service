@@ -1,0 +1,30 @@
+{
+    "user_id": "test001",
+    "attendance_report": [
+        {
+            "check_in_date": "13/10/2023",
+            "check_in_place": "วิลล่า ราชพฤกษ์-ปิ่นเกล้า",
+            "check_in_time": "09:00",
+            "check_out_date": "13/10/2023",
+            "check_out_place": "วิลล่า ราชพฤกษ์-ปิ่นเกล้า",
+            "check_out_time": "18:00"
+        },
+        {
+            "check_in_date": "12/10/2023",
+            "check_in_place": "วิลล่า ราชพฤกษ์-ปิ่นเกล้า",
+            "check_in_time": "09:00",
+            "check_out_date": "12/10/2023",
+            "check_out_place": "วิลล่า ราชพฤกษ์-ปิ่นเกล้า",
+            "check_out_time": "18:00"
+        },
+        {
+            "check_in_date": "11/10/2023",
+            "check_in_place": "วิลล่า ราชพฤกษ์-ปิ่นเกล้า",
+            "check_in_time": "18:30",
+            "check_out_date": "12/10/2023",
+            "check_out_place": "วิลล่า ราชพฤกษ์-ปิ่นเกล้า",
+            "check_out_time": "05:30"
+        }
+    ],
+    "message": "Record Mockup"
+}
