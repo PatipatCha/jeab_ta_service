@@ -1,0 +1,29 @@
+{
+    "user_id": "test001",
+    "attendance_report": [
+        {
+            "check_in_date": "12/10/2023",
+            "check_in_place": "วิลล่า ราชพฤกษ์-ปิ่นเกล้า",
+            "description": {
+                "check_in_time": "08:00",
+                "check_in_image": "https://shorturl.at/tLZ06",
+                "check_out_time": "18:00",
+                "check_out_image": "https://shorturl.at/BDLN3",
+                "working_hours": "8 ชั่วโมง"
+            }
+        },
+        {
+            "check_in_date": "13/10/2023",
+            "description": {
+                "check_in_time": "08:00",
+                "check_in_place": "วิลล่า ราชพฤกษ์-ปิ่นเกล้า",
+                "check_in_image": "https://shorturl.at/tLZ06",
+                "check_out_time": "18:00",
+                "check_out_image": "https://shorturl.at/BDLN3",
+                "check_out_place": "วิลล่า ราชพฤกษ์-ปิ่นเกล้า",
+                "working_hours": "8 ชั่วโมง"
+            }
+        }
+    ],
+    "message": "Record Mockup"
+}
