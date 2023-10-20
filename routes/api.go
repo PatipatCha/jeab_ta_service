@@ -8,10 +8,14 @@ import (
 
 func SetupApiRoutes(app *fiber.App, store *session.Store) {
 
-	apita := app.Group("/api/ta")
+	apita := app.Group("/api")
 
 	// *TA Menu
 	// api.Post("/create-project", controllers.CreateProject)
 	apita.Get("/get-report/:userId?", controller.GetReport)
+	apita.Post("/checkin", controller.CheckIn)
+	apita.Post("/checkout", controller.CheckOut)
+	//
+	//
 
 }

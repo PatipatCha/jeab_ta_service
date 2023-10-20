@@ -1,5 +1,9 @@
 {
-    "check_in_project_id": 1,
-    "check_in_place": "วิลล่า ราชพฤกษ์-ปิ่นเกล้า",
-    "check_in_datetime": "54321"
+    "user_id": "test001",
+    "project_id": "1",
+    "project_place": "วิลล่า ราชพฤกษ์-ปิ่นเกล้า",
+    "image_id":"img001",
+    "check_datetime": "2023-10-17 22:14:41",
+    "check_status": "2023-10-17 22:14:41",
+    "created_by":"system"
 }

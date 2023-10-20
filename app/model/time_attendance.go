@@ -6,5 +6,4 @@ type TimeAttendance struct {
 	CheckInTime   string `json:"check_in_time"`
 	CheckOutTime  string `json:"check_out_time"`
 	CheckOutPlace string `json:"check_out_place"`
-	WorkingHours  string `json:"working_hours"`
 }
