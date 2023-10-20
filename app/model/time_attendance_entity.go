@@ -13,4 +13,5 @@ type TimeAttendanceEntity struct {
 	ImageId       string `db:"image_id"`
 	CheckStatus   string `db:"check_status" json:"check_status"`
 	CreatedBy     string `db:"created_by" json:"created_by"`
+	RefId         string `db:"ref_id" json:"ref_id"`
 }

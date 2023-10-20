@@ -19,7 +19,7 @@ func CheckIn(c *fiber.Ctx) error {
 	var res model.TimeAttendanceEntity
 
 	request.CheckStatus = checkStatus
-	resValidate := services.VaildateCheckStatus(request.UserId, checkStatus)
+	resValidate := services.VaildateCheckStatus(request.UserId, request.RefId, checkStatus)
 	if !resValidate {
 		var msg = os.Getenv("VAILD_OTHER_ERROR")
 		if request.CheckStatus == "checkin" {
@@ -35,6 +35,8 @@ func CheckIn(c *fiber.Ctx) error {
 		return c.JSON(output)
 	}
 
+	request.RefId = request.UserId + services.StringWithCharset(20)
+
 	res, err := services.SaveData(request)
 	if err != nil {
 		return err
@@ -43,7 +45,7 @@ func CheckIn(c *fiber.Ctx) error {
 	output := fiber.Map{
 		"user_id": request.UserId,
 		"data":    res,
-		"message": os.Getenv("SAVE_DATA_SUCCESS"),
+		"message": os.Getenv("SAVE_CHECKIN_SUCCESS"),
 	}
 
 	return c.JSON(output)
@@ -59,7 +61,7 @@ func CheckOut(c *fiber.Ctx) error {
 	var res model.TimeAttendanceEntity
 
 	request.CheckStatus = checkStatus
-	resValidate := services.VaildateCheckStatus(request.UserId, checkStatus)
+	resValidate := services.VaildateCheckStatus(request.UserId, request.RefId, checkStatus)
 	if !resValidate {
 		var msg = os.Getenv("VAILD_OTHER_ERROR")
 		if request.CheckStatus == "checkout" {
@@ -83,7 +85,7 @@ func CheckOut(c *fiber.Ctx) error {
 	output := fiber.Map{
 		"user_id": request.UserId,
 		"data":    res,
-		"message": os.Getenv("SAVE_DATA_SUCCESS"),
+		"message": os.Getenv("SAVE_CHECKOUT_SUCCESS"),
 	}
 
 	return c.JSON(output)

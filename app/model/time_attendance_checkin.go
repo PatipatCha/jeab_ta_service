@@ -8,6 +8,7 @@ type TimeAttendanceCheckInRequest struct {
 	ImageId       string `json:"image_id"`
 	CheckStatus   string `json:"check_status"`
 	CreatedBy     string `json:"created_by"`
+	RefId         string `json:"ref_id"`
 }
 
 // UserId        string `db:"user_id" json:"user_id"`
