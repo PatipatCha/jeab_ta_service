@@ -11,41 +11,46 @@ import (
 
 func CheckIn(c *fiber.Ctx) error {
 	var checkStatus = "checkin"
+	// var res model.TimeAttendanceEntity
 	var request model.TimeAttendanceCheckInRequest
 	if err := c.BodyParser(&request); err != nil {
 		return err
 	}
 
-	var res model.TimeAttendanceEntity
-
-	request.CheckStatus = checkStatus
-	resValidate := services.VaildateCheckStatus(request.UserId, request.RefId, checkStatus)
+	userId := request.UserId
+	resValidate, _ := services.VaildateUserId(userId)
 	if !resValidate {
-		var msg = os.Getenv("VAILD_OTHER_ERROR")
-		if request.CheckStatus == "checkin" {
-			msg = os.Getenv("VAILD_CHECKOUT_ERROR")
-		}
-
 		output := model.TimeAttendanceResponse{
-			UserId:  request.UserId,
+			UserId:  userId,
 			Data:    nil,
-			Message: msg,
+			Message: os.Getenv("VAILD_USERID_NOT_FOUND"),
+		}
+		return c.JSON(output)
+	}
+
+	resValidate, resTA, resValidateMsg := services.VaildateCheckStatus(userId, "", checkStatus)
+	if !resValidate {
+
+		output := fiber.Map{
+			"message": resValidateMsg,
+			"user_id": request.UserId,
+			"data":    resTA,
 		}
 
 		return c.JSON(output)
 	}
 
-	request.RefId = request.UserId + services.StringWithCharset(20)
-
+	request.CheckStatus = checkStatus
+	request.RefId = services.StringWithCharset(userId, request.ProjectId)
 	res, err := services.SaveData(request)
 	if err != nil {
 		return err
 	}
 
 	output := fiber.Map{
+		"message": os.Getenv("SAVE_CHECKIN_SUCCESS"),
 		"user_id": request.UserId,
 		"data":    res,
-		"message": os.Getenv("SAVE_CHECKIN_SUCCESS"),
 	}
 
 	return c.JSON(output)
@@ -57,43 +62,107 @@ func CheckOut(c *fiber.Ctx) error {
 	if err := c.BodyParser(&request); err != nil {
 		return err
 	}
+	userId := request.UserId
+	refId := request.RefId
 
-	var res model.TimeAttendanceEntity
-
-	request.CheckStatus = checkStatus
-	resValidate := services.VaildateCheckStatus(request.UserId, request.RefId, checkStatus)
-	if !resValidate {
-		var msg = os.Getenv("VAILD_OTHER_ERROR")
-		if request.CheckStatus == "checkout" {
-			msg = os.Getenv("VAILD_CHECKIN_ERROR")
-		}
-
+	if refId == "" {
 		output := model.TimeAttendanceResponse{
-			UserId:  request.UserId,
+			UserId:  userId,
 			Data:    nil,
-			Message: msg,
+			Message: "RefId ????",
+		}
+		return c.JSON(output)
+	}
+
+	resValidate, _ := services.VaildateUserId(userId)
+	if !resValidate {
+		output := model.TimeAttendanceResponse{
+			UserId:  userId,
+			Data:    nil,
+			Message: os.Getenv("VAILD_USERID_NOT_FOUND"),
+		}
+		return c.JSON(output)
+	}
+
+	resValidate, resTA, resValidateMsg := services.VaildateCheckStatus(userId, refId, checkStatus)
+	if !resValidate {
+		output := fiber.Map{
+			"message": resValidateMsg,
+			"user_id": request.UserId,
+			"data":    resTA,
 		}
 
 		return c.JSON(output)
 	}
 
+	request.CheckStatus = checkStatus
 	res, err := services.SaveData(request)
 	if err != nil {
 		return err
 	}
 
 	output := fiber.Map{
+		"message": os.Getenv("SAVE_CHECKOUT_SUCCESS"),
 		"user_id": request.UserId,
 		"data":    res,
-		"message": os.Getenv("SAVE_CHECKOUT_SUCCESS"),
 	}
 
 	return c.JSON(output)
+
+	// var checkStatus = "checkin"
+	// var res model.TimeAttendanceEntity
+	// var request model.TimeAttendanceCheckInRequest
+	// if err := c.BodyParser(&request); err != nil {
+	// 	return err
+	// }
+
+	// userId := request.UserId
+	// resValidate, _ := services.VaildateUserId(userId)
+	// if !resValidate {
+	// 	output := model.TimeAttendanceResponse{
+	// 		UserId:  userId,
+	// 		Data:    nil,
+	// 		Message: os.Getenv("VAILD_USERID_NOT_FOUND"),
+	// 	}
+	// 	return c.JSON(output)
+	// }
+
+	// request.CheckStatus = checkStatus
+
+	// _, resValidate := services.VaildateCheckStatus(request.UserId, request.RefId, checkStatus)
+	// if !resValidate {
+	// 	var msg = os.Getenv("VAILD_OTHER_ERROR")
+	// 	if request.CheckStatus == "checkout" {
+	// 		msg = os.Getenv("VAILD_CHECKIN_ERROR")
+	// 	}
+
+	// 	output := model.TimeAttendanceResponse{
+	// 		UserId:  request.UserId,
+	// 		Data:    nil,
+	// 		Message: msg,
+	// 	}
+
+	// 	return c.JSON(output)
+	// }
+
+	// res, err := services.SaveData(request)
+	// if err != nil {
+	// 	return err
+	// }
+
+	// output := fiber.Map{
+	// 	"user_id": request.UserId,
+	// 	"data":    res,
+	// 	"message": os.Getenv("SAVE_CHECKOUT_SUCCESS"),
+	// }
+
+	// return c.JSON(output)
+
 }
 
 func GetReport(c *fiber.Ctx) error {
 	var ta []model.TimeAttendanceEntity
-	db, err := databases.ConnectDB()
+	db, err := databases.ConnectTADB()
 	if err != nil {
 		return err
 	}

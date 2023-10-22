@@ -1,8 +1,10 @@
 package services
 
 import (
-	"log"
+	"encoding/base64"
 	"math/rand"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -11,55 +13,75 @@ import (
 )
 
 type CheckStatusService interface {
+	RandomString(number int) string
 	StringWithCharset(length int) string
+	VaildateUserId(userId string) bool // Call Api User Microservices : Phase 2
 	VaildateCheckStatus(userId string, check_status string) bool
 	SaveData(request model.TimeAttendanceCheckInRequest) (model.TimeAttendanceEntity, error)
 }
 
-func StringWithCharset(length int) string {
-	const charset = "abcdefghijklmnopqrstuvwxyz"
+func RandomString(number int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
 	var seededRand *rand.Rand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[seededRand.Intn(len(charset))]
+	randomString := make([]byte, number)
+	for i := range randomString {
+		randomString[i] = charset[seededRand.Intn(len(charset))]
 	}
-	return string(b)
+	return string(randomString)
 }
 
-func VaildateCheckStatus(userId string, refId string, check_status string) bool {
+func StringWithCharset(userId string, projectId string) string {
+	ranText := RandomString(10)
+	t := strconv.Itoa(int(time.Now().Unix()))
+	encodedText := base64.StdEncoding.EncodeToString([]byte(t + userId + projectId + ranText))
+	return encodedText
+}
+
+func VaildateUserId(userId string) (bool, error) {
+	var ta model.TimeAttendanceEntity
+	db, err := databases.ConnectAccountDB()
+	if err != nil {
+		return false, err
+	}
+
+	result := db.Table("users").Where("user_id = ?", userId).Where("status = ?", "active").Where("role = ?", "sg").Scan(&ta)
+	if result.RowsAffected <= 0 {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func VaildateCheckStatus(userId string, refId string, check_status string) (bool, model.TimeAttendanceEntity, string) {
 	var ta model.TimeAttendanceEntity
 	checkStatus := strings.ToLower(check_status)
 
-	db, err := databases.ConnectDB()
+	db, err := databases.ConnectTADB()
 	if err != nil {
-		return false
+		return false, ta, string(err.Error())
 	}
-
-	// res := db.Table("time_attendance").Where("check_status", status).Where("user_id", userId).Where("check_date_time", now.Format("2006-01-02")).Scan(&s)
 
 	if checkStatus == "checkin" {
 		db.Table("time_attendance").Where("user_id = ?", userId).Last(&ta)
-		println(ta.CheckStatus)
+		// fmt.Println(ta.CheckStatus + " === " + string(checkStatus))
 		if ta.CheckStatus == checkStatus {
-			return false
+			return false, ta, os.Getenv("VAILD_CHECKIN_ERROR")
 		}
 	}
 
 	if checkStatus == "checkout" {
-		if refId != "" {
-			result := db.Table("time_attendance").Where("user_id = ?", userId).Where("ref_id = ?", refId).First(&ta)
-			println("checkout" + ta.RefId)
-			if result.RowsAffected == 0 {
-				log.Fatalf("cannot retrieve : %v\n", result.Error)
-				return false
-			}
+		findCheckIn := db.Table("time_attendance").Where("user_id = ?", userId).Where("ref_id = ?", refId).Where("check_status = ?", "checkin").Last(&ta)
+		if findCheckIn.RowsAffected == 0 {
+			return false, ta, "Ref ID Not Found"
 		}
 
-		if ta.RefId == refId {
-			println(ta.RefId + "==" + refId)
-			return false
+		var result model.TimeAttendanceEntity
+		db.Table("time_attendance").Where("user_id = ?", userId).Where("ref_id = ?", refId).Where("check_status = ?", "checkout").Last(&result)
+		if result.RefId == refId {
+			return false, ta, os.Getenv("VAILD_CHECKOUT_ERROR")
 		}
+
 	}
 
 	// if result.Error != nil {
@@ -71,7 +93,7 @@ func VaildateCheckStatus(userId string, refId string, check_status string) bool 
 	// 	return false
 	// }
 
-	return true
+	return true, ta, "Passed"
 }
 
 func SaveData(request model.TimeAttendanceCheckInRequest) (model.TimeAttendanceEntity, error) {
@@ -86,12 +108,16 @@ func SaveData(request model.TimeAttendanceCheckInRequest) (model.TimeAttendanceE
 		RefId:         request.RefId,
 	}
 
-	db, err := databases.ConnectDB()
+	db, err := databases.ConnectTADB()
 	if err != nil {
 		return entity, err
 	}
 
 	err = db.Table("time_attendance").Create(&entity).Scan(&entity).Error
 
+	// err = db.Table("time_attendance").Find("user_id").Error
+
 	return entity, err
 }
+
+// res := db.Table("time_attendance").Where("check_status", status).Where("user_id", userId).Where("check_date_time", now.Format("2006-01-02")).Scan(&s)
