@@ -1,33 +1,41 @@
 package controller
 
 import (
-	"github.com/PatipatCha/jeab_ta_service/app/databases"
+	"os"
+
 	"github.com/PatipatCha/jeab_ta_service/app/model"
+	"github.com/PatipatCha/jeab_ta_service/app/services"
 	"github.com/gofiber/fiber/v2"
 )
 
 func GetReport(c *fiber.Ctx) error {
-	var ta []model.TimeAttendanceEntity
-	db, err := databases.ConnectTADB()
-	if err != nil {
-		return err
-	}
-
+	// var ta []model.TimeAttendanceEntity
 	// userId := c.Params("userId")
-	res := db.Table("time_attendance").Find(&ta).Error
-	if err := res; err != nil {
-		return err
+	month := c.Query("month")
+	userId := c.Query("user_id")
+	resValidate, _ := services.VaildateUserId(userId)
+	if !resValidate {
+		output := model.TimeAttendanceResponse{
+			UserId:  userId,
+			Data:    nil,
+			Message: os.Getenv("VAILD_USERID_NOT_FOUND"),
+		}
+		return c.JSON(output)
 	}
 
-	// for _, taParam := range ta {
-	// 	// fmt.Println(integ, " = ", spell.CheckInAT)
-	// 	taModel := model.TimeAttendance{CheckInDate: taParam.CheckInAT, CheckInPlace: taParam.CheckInPlace, CheckInTime: taParam.CheckInAT, CheckOutTime: taParam.CheckOutAt, CheckOutPlace: taParam.CheckOutPlace}
-	// }
+	var _ = services.GetReportByMonth(month)
 
-	// a := model.TimeAttendanceResponse{user_id: "", Message: "", list: taModel}
+	res := services.GetReportNow()
 
-	// bytes, _ := json.Marshal(ta)
-	// fmt.Println(string())
-
-	return res
+	return c.JSON(res)
 }
+
+// for _, taParam := range ta {
+// 	// fmt.Println(integ, " = ", spell.CheckInAT)
+// 	taModel := model.TimeAttendance{CheckInDate: taParam.CheckInAT, CheckInPlace: taParam.CheckInPlace, CheckInTime: taParam.CheckInAT, CheckOutTime: taParam.CheckOutAt, CheckOutPlace: taParam.CheckOutPlace}
+// }
+
+// a := model.TimeAttendanceResponse{user_id: "", Message: "", list: taModel}
+
+// bytes, _ := json.Marshal(ta)
+// fmt.Println(string())
