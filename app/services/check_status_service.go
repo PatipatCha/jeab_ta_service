@@ -10,14 +10,21 @@ import (
 
 	"github.com/PatipatCha/jeab_ta_service/app/databases"
 	"github.com/PatipatCha/jeab_ta_service/app/model"
+	"github.com/google/uuid"
 )
 
 type CheckStatusService interface {
+	GenUUID() string
 	RandomString(number int) string
 	StringWithCharset(length int) string
 	VaildateUserId(userId string) bool // Call Api User Microservices : Phase 2
 	VaildateCheckStatus(userId string, check_status string) bool
-	SaveData(request model.TimeAttendanceCheckInRequest) (model.TimeAttendanceEntity, error)
+}
+
+func GenUUID() string {
+	id := uuid.New()
+	var time = time.Now().UnixNano()
+	return string(time) + id.String()
 }
 
 func RandomString(number int) string {
@@ -96,28 +103,28 @@ func VaildateCheckStatus(userId string, refId string, check_status string) (bool
 	return true, ta, "Passed"
 }
 
-func SaveData(request model.TimeAttendanceCheckInRequest) (model.TimeAttendanceEntity, error) {
-	entity := model.TimeAttendanceEntity{
-		UserId:        string(request.UserId),
-		CheckDateTime: string(request.CheckDateTime),
-		ProjectId:     string(request.ProjectId),
-		ProjectPlace:  string(request.ProjectPlace),
-		CheckStatus:   strings.ToLower(request.CheckStatus),
-		CreatedBy:     request.CreatedBy,
-		ImageId:       request.ImageId,
-		RefId:         request.RefId,
-	}
+// func SaveData(request model.TimeAttendanceCheckInRequest) (model.TimeAttendanceEntity, error) {
+// 	entity := model.TimeAttendanceEntity{
+// 		UserId:        string(request.UserId),
+// 		CheckDateTime: string(request.CheckDateTime),
+// 		ProjectId:     string(request.ProjectId),
+// 		ProjectPlace:  string(request.ProjectPlace),
+// 		CheckStatus:   strings.ToLower(request.CheckStatus),
+// 		CreatedBy:     request.CreatedBy,
+// 		ImageId:       request.ImageId,
+// 		RefId:         request.RefId,
+// 	}
 
-	db, err := databases.ConnectTADB()
-	if err != nil {
-		return entity, err
-	}
+// 	db, err := databases.ConnectTADB()
+// 	if err != nil {
+// 		return entity, err
+// 	}
 
-	err = db.Table("time_attendance").Create(&entity).Scan(&entity).Error
+// 	err = db.Table("time_attendance").Create(&entity).Scan(&entity).Error
 
-	// err = db.Table("time_attendance").Find("user_id").Error
+// 	// err = db.Table("time_attendance").Find("user_id").Error
 
-	return entity, err
-}
+// 	return entity, err
+// }
 
 // res := db.Table("time_attendance").Where("check_status", status).Where("user_id", userId).Where("check_date_time", now.Format("2006-01-02")).Scan(&s)
