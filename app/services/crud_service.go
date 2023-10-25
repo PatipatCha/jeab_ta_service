@@ -40,8 +40,17 @@ func SaveData(request model.TimeAttendanceCheckInRequest) (model.TimeAttendanceE
 	return entity, err
 }
 
-func GetReportByMonth(month string) model.TimeAttendanceReportList {
-	var ta_report = model.TimeAttendanceReportList{}
+func GetReportByMonth(month string) []model.TimeAttendanceReportList {
+	var ta_report = []model.TimeAttendanceReportList{}
+	content, err := ioutil.ReadFile("./app/json/record_mockup_test_d.json")
+	if err != nil {
+		log.Fatal("Error when opening file: ", err)
+	}
+
+	err = json.Unmarshal(content, &ta_report)
+	if err != nil {
+		log.Fatal("Error when opening file: ", err)
+	}
 
 	return ta_report
 
@@ -55,7 +64,7 @@ func GetReportNow() model.TimeAttendanceReportList {
 	}
 
 	err = json.Unmarshal(content, &ta_report)
-	log.Printf("origin: %s\n", ta_report.Data)
+
 	return ta_report
 }
 

@@ -2,7 +2,6 @@ package services
 
 import (
 	"encoding/base64"
-	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -21,27 +20,27 @@ type CheckStatusService interface {
 	VaildateCheckStatus(userId string, check_status string) bool
 }
 
-func GenUUID() string {
-	id := uuid.New()
-	var time = time.Now().UnixNano()
-	return string(time) + id.String()
-}
+// func GenUUID() string {
+// 	id := uuid.New()
+// 	return id.String()
+// }
 
-func RandomString(number int) string {
-	const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
-	var seededRand *rand.Rand = rand.New(
-		rand.NewSource(time.Now().UnixNano()))
-	randomString := make([]byte, number)
-	for i := range randomString {
-		randomString[i] = charset[seededRand.Intn(len(charset))]
-	}
-	return string(randomString)
-}
+// func RandomString(number int) string {
+// 	const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+// 	var seededRand *rand.Rand = rand.New(
+// 		rand.NewSource(time.Now().UnixNano()))
+// 	randomString := make([]byte, number)
+// 	for i := range randomString {
+// 		randomString[i] = charset[seededRand.Intn(len(charset))]
+// 	}
+// 	return string(randomString)
+// }
 
 func StringWithCharset(userId string, projectId string) string {
-	ranText := RandomString(10)
+	// ranText := RandomString(10)
 	t := strconv.Itoa(int(time.Now().Unix()))
-	encodedText := base64.StdEncoding.EncodeToString([]byte(t + userId + projectId + ranText))
+	// encodedText := base64.StdEncoding.EncodeToString([]byte(t + userId + projectId + ranText))
+	encodedText := uuid.New().String() + "-" + base64.StdEncoding.EncodeToString([]byte(t+userId))
 	return encodedText
 }
 

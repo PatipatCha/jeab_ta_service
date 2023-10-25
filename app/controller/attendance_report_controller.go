@@ -23,9 +23,15 @@ func GetReport(c *fiber.Ctx) error {
 		return c.JSON(output)
 	}
 
-	var _ = services.GetReportByMonth(month)
+	var data = services.GetReportByMonth(month)
 
-	res := services.GetReportNow()
+	// res := services.GetReportNow()
+
+	var res = model.TimeAttendanceReportResponse{
+		UserId:  userId,
+		Data:    data,
+		Message: "Attendance Report List",
+	}
 
 	return c.JSON(res)
 }

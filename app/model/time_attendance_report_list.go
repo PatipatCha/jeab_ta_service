@@ -18,13 +18,13 @@ func (r *TimeAttendanceReportList) Marshal() ([]byte, error) {
 	return json.Marshal(r)
 }
 
-type TimeAttendanceReportList struct {
-	UserID  string  `json:"user_id"`
-	Data    []Datum `json:"data"`
-	Message string  `json:"message"`
-}
+// type TimeAttendanceReportList struct {
+// UserID  string  `json:"user_id"`
+// Data []Datum `json:"data"`
+// Message string  `json:"message"`
+// }
 
-type Datum struct {
+type TimeAttendanceReportList struct {
 	Date  Date   `json:"date"`
 	Lists []List `json:"lists"`
 }

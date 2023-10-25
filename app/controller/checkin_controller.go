@@ -40,8 +40,8 @@ func CheckIn(c *fiber.Ctx) error {
 	}
 
 	request.CheckStatus = checkStatus
-	// request.RefId = services.StringWithCharset(userId, request.ProjectId)
-	request.RefId = services.GenUUID()
+	request.RefId = services.StringWithCharset(userId, request.ProjectId)
+	// request.RefId = uuid.New().String() + "-" + userId
 	res, err := services.SaveData(request)
 	if err != nil {
 		return err
