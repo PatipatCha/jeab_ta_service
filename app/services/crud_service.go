@@ -11,6 +11,7 @@ import (
 type CRUDService interface {
 	SaveData(request model.TimeAttendanceCheckInRequest) (model.TimeAttendanceEntity, error)
 	GetReportForMobile() model.TimeAttendanceReportList
+	GetReportForWeb(findUserId string) ([]model.TimeAttendanceDashboardList, string)
 	GetReportNow() model.TimeAttendanceReportList
 }
 
@@ -60,7 +61,9 @@ func GetReportForMobile(user_id string, month string) (bool, []model.TimeAttenda
 
 	db.Raw(sqlRaw, user_id, month).Scan(&ta_entity)
 
-	if ta_entity == nil {
+	// fmt.Println(len(ta_entity))
+
+	if len(ta_entity) <= 0 {
 		msg = os.Getenv("NO_RECORD_LISTS")
 	}
 
@@ -78,7 +81,8 @@ func GetReportForWeb(findUserId string) ([]model.TimeAttendanceDashboardList, st
 	}
 
 	sqlRawA := "SELECT a.user_id AS \"user_id\", a.project_place AS \"project_place\", TO_CHAR( a.check_date_time :: DATE, 'dd-mm-yyyy' ) AS \"check_in_date\", a.image_url AS \"check_in_image\", TO_CHAR(a.check_date_time, 'HH24:MI') AS \"check_in_time\", TO_CHAR( b.check_date_time :: DATE, 'dd-mm-yyyy' ) AS \"check_out_date\", TO_CHAR(b.check_date_time, 'HH24:MI') AS \"check_out_time\", b.image_url AS \"check_out_image\" FROM time_attendance a, time_attendance b "
-	sqlRawB := "WHERE a.check_status = 'checkin' AND b.check_status = 'checkout' AND a.ref_id = b.ref_id AND EXTRACT( MONTH FROM a.check_date_time ) = EXTRACT( MONTH FROM LOCALTIMESTAMP AT TIME ZONE 'utc+7' ) "
+	sqlRawB := "WHERE a.check_status = 'checkin' AND b.check_status = 'checkout' AND a.ref_id = b.ref_id "
+	_ = "AND EXTRACT( MONTH FROM a.check_date_time ) = EXTRACT( MONTH FROM LOCALTIMESTAMP AT TIME ZONE 'utc+7' ) "
 	sqlRawC := "AND a.user_id = ? "
 	sqlRawD := "ORDER BY a.check_date_time DESC"
 

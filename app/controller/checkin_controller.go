@@ -21,7 +21,7 @@ func CheckIn(c *fiber.Ctx) error {
 	if !resValidate {
 		output := model.TimeAttendanceResponse{
 			UserId:  userId,
-			Data:    nil,
+			Data:    []model.TimeAttendanceReportList{},
 			Message: os.Getenv("VAILD_USERID_NOT_FOUND"),
 		}
 		return c.JSON(output)
@@ -58,6 +58,7 @@ func CheckIn(c *fiber.Ctx) error {
 
 func CheckOut(c *fiber.Ctx) error {
 	var checkStatus = "checkout"
+	var data = []model.TimeAttendanceReportList{}
 	var request model.TimeAttendanceCheckInRequest
 	if err := c.BodyParser(&request); err != nil {
 		return err
@@ -68,7 +69,7 @@ func CheckOut(c *fiber.Ctx) error {
 	if refId == "" {
 		output := model.TimeAttendanceResponse{
 			UserId:  userId,
-			Data:    nil,
+			Data:    data,
 			Message: "RefId ????",
 		}
 		return c.JSON(output)
@@ -78,7 +79,7 @@ func CheckOut(c *fiber.Ctx) error {
 	if !resValidate {
 		output := model.TimeAttendanceResponse{
 			UserId:  userId,
-			Data:    nil,
+			Data:    data,
 			Message: os.Getenv("VAILD_USERID_NOT_FOUND"),
 		}
 		return c.JSON(output)

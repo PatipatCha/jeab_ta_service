@@ -61,7 +61,7 @@
             "method": "GET",
             "sortNum": 20000,
             "created": "2023-10-31T13:23:13.755Z",
-            "modified": "2023-10-31T13:25:45.158Z",
+            "modified": "2023-11-01T07:48:59.068Z",
             "headers": [],
             "params": [
                 {
@@ -72,6 +72,12 @@
                 {
                     "name": "user_id",
                     "value": "test098",
+                    "isPath": false
+                },
+                {
+                    "name": "find_user_id",
+                    "value": "",
+                    "isDisabled": true,
                     "isPath": false
                 }
             ],

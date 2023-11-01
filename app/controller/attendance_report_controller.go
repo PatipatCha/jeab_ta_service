@@ -55,7 +55,10 @@ func GetReportMobile(c *fiber.Ctx) error {
 	month := c.Query("month")
 	_, data, msg := services.GetReportForMobile(userId, month)
 
-	resData := services.MapReportForMobile(data)
+	var resData = []model.TimeAttendanceReportList{}
+	if len(data) > 0 {
+		resData = services.MapReportForMobile(data)
+	}
 
 	var res = fiber.Map{
 		"UserId":  userId,
