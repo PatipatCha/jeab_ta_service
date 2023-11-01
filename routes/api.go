@@ -12,7 +12,9 @@ func SetupApiRoutes(app *fiber.App, store *session.Store) {
 
 	//
 	// *TA Menu
-	apita.Get("/get-ta-report", controller.GetReport)
+	apita.Get("/get-ta-report-mockup/", controller.GetReportMockUp)
+	apita.Get("/get-ta-report-web/", controller.GetReportWeb)
+	apita.Get("/get-ta-report-mobile/", controller.GetReportMobile)
 	apita.Post("/checkin", controller.CheckIn)
 	apita.Post("/checkout", controller.CheckOut)
 	//

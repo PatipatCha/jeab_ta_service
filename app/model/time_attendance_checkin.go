@@ -5,7 +5,7 @@ type TimeAttendanceCheckInRequest struct {
 	ProjectId     string `json:"project_id"`
 	ProjectPlace  string `json:"project_place"`
 	CheckDateTime string `json:"check_date_time"`
-	ImageId       string `json:"image_id"`
+	ImageUrl      string `json:"image_url"`
 	CheckStatus   string `json:"check_status"`
 	CreatedBy     string `json:"created_by"`
 	RefId         string `json:"ref_id"`
@@ -15,7 +15,7 @@ type TimeAttendanceCheckInRequest struct {
 // ProjectId     string `db:"project_id" json:"project_id"`
 // ProjectPlace  string `db:"project_place" json:"project_place"`
 // CheckDateTime string `db:"check_datetime" json:"check_datetime"`
-// ImageId       string `db:"image_id"`
+// ImageUrl       string `db:"image_url"`
 // CheckStatus   string `db:"check_status" json:"check_status"`
 // CreateBy      string `db:"created_by" json:"created_by"`
 
