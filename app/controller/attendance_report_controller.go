@@ -57,10 +57,10 @@ func GetReportMobile(c *fiber.Ctx) error {
 
 	resData := services.MapReportForMobile(data)
 
-	var res = model.TimeAttendanceReportForMobileResponse{
-		UserId:  userId,
-		Data:    resData,
-		Message: msg,
+	var res = fiber.Map{
+		"UserId":  userId,
+		"Data":    resData,
+		"Message": msg,
 	}
 
 	return c.JSON(res)

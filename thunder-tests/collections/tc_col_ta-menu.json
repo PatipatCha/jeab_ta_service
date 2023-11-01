@@ -76,6 +76,31 @@
                 }
             ],
             "tests": []
+        },
+        {
+            "_id": "aa31dbce-301b-402f-8ede-0fe7ff1287e8",
+            "colId": "2d85f0ac-713d-4d53-95d7-172545401848",
+            "containerId": "f4d13717-63fc-469a-808c-206c6b1604bc",
+            "name": "LOCAL - GetReportMobile",
+            "url": "localhost:8080/api/get-ta-report-mobile/?user_id=20231021sgtest&month=10",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2023-11-01T04:20:47.408Z",
+            "modified": "2023-11-01T04:21:04.457Z",
+            "headers": [],
+            "params": [
+                {
+                    "name": "user_id",
+                    "value": "20231021sgtest",
+                    "isPath": false
+                },
+                {
+                    "name": "month",
+                    "value": "10",
+                    "isPath": false
+                }
+            ],
+            "tests": []
         }
     ]
 }
