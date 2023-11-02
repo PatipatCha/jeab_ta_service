@@ -12,16 +12,17 @@ import (
 )
 
 func GetReportWeb(c *fiber.Ctx) error {
-	var taReportList = []model.TimeAttendanceReportList{}
+	// var taReportList = []model.TimeAttendanceReportList{}
+	var ta = []model.TimeAttendanceDashboardList{}
 	// var ta []model.TimeAttendanceEntity
 	// userId := c.Params("userId")
 	_ = c.Query("month")
 	userId := c.Query("user_id")
 	resValidate, _ := services.VaildateUserId(userId)
 	if !resValidate {
-		output := model.TimeAttendanceResponse{
+		output := model.TimeAttendanceDashboardForWebResponse{
 			UserId:  userId,
-			Data:    taReportList,
+			Data:    ta,
 			Message: os.Getenv("VAILD_USERID_NOT_FOUND"),
 		}
 		return c.JSON(output)
@@ -44,7 +45,7 @@ func GetReportMobile(c *fiber.Ctx) error {
 	userId := c.Query("user_id")
 	resValidate, _ := services.VaildateUserId(userId)
 	if !resValidate {
-		output := model.TimeAttendanceResponse{
+		output := model.TimeAttendanceReportForMobileResponse{
 			UserId:  userId,
 			Data:    taReportList,
 			Message: os.Getenv("VAILD_USERID_NOT_FOUND"),
@@ -54,16 +55,16 @@ func GetReportMobile(c *fiber.Ctx) error {
 
 	month := c.Query("month")
 	_, data, msg := services.GetReportForMobile(userId, month)
-
-	var resData = []model.TimeAttendanceReportList{}
 	if len(data) > 0 {
-		resData = services.MapReportForMobile(data)
+		taReportList = services.RecordListForMobile(data)
+	} else {
+		msg = os.Getenv("NO_RECORD_LISTS")
 	}
 
 	var res = fiber.Map{
-		"UserId":  userId,
-		"Data":    resData,
-		"Message": msg,
+		"user_id": userId,
+		"message": msg,
+		"data":    taReportList,
 	}
 
 	return c.JSON(res)

@@ -1,6 +1,6 @@
 package model
 
-type TimeAttendanceCheckInRequest struct {
+type TimeAttendanceCheckInOutRequest struct {
 	UserId        string `json:"user_id"`
 	ProjectId     string `json:"project_id"`
 	ProjectPlace  string `json:"project_place"`

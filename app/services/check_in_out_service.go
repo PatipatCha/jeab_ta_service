@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type CheckStatusService interface {
+type CheckInOutService interface {
 	GenUUID() string
 	RandomString(number int) string
 	StringWithCharset(length int) string

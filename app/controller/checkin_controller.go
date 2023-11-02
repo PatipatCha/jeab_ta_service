@@ -11,7 +11,7 @@ import (
 func CheckIn(c *fiber.Ctx) error {
 	var checkStatus = "checkin"
 	// var res model.TimeAttendanceEntity
-	var request model.TimeAttendanceCheckInRequest
+	var request model.TimeAttendanceCheckInOutRequest
 	if err := c.BodyParser(&request); err != nil {
 		return err
 	}
@@ -19,7 +19,7 @@ func CheckIn(c *fiber.Ctx) error {
 	userId := request.UserId
 	resValidate, _ := services.VaildateUserId(userId)
 	if !resValidate {
-		output := model.TimeAttendanceResponse{
+		output := model.TimeAttendanceReportForMobileResponse{
 			UserId:  userId,
 			Data:    []model.TimeAttendanceReportList{},
 			Message: os.Getenv("VAILD_USERID_NOT_FOUND"),
@@ -59,7 +59,7 @@ func CheckIn(c *fiber.Ctx) error {
 func CheckOut(c *fiber.Ctx) error {
 	var checkStatus = "checkout"
 	var data = []model.TimeAttendanceReportList{}
-	var request model.TimeAttendanceCheckInRequest
+	var request model.TimeAttendanceCheckInOutRequest
 	if err := c.BodyParser(&request); err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func CheckOut(c *fiber.Ctx) error {
 	refId := request.RefId
 
 	if refId == "" {
-		output := model.TimeAttendanceResponse{
+		output := model.TimeAttendanceReportForMobileResponse{
 			UserId:  userId,
 			Data:    data,
 			Message: "RefId ????",
@@ -77,7 +77,7 @@ func CheckOut(c *fiber.Ctx) error {
 
 	resValidate, _ := services.VaildateUserId(userId)
 	if !resValidate {
-		output := model.TimeAttendanceResponse{
+		output := model.TimeAttendanceReportForMobileResponse{
 			UserId:  userId,
 			Data:    data,
 			Message: os.Getenv("VAILD_USERID_NOT_FOUND"),
