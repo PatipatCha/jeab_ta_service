@@ -9,15 +9,17 @@ import (
 func SetupApiRoutes(app *fiber.App, store *session.Store) {
 
 	apita := app.Group("/api")
+	v1 := apita.Group("/v1")
 
-	//
 	// *TA Menu
-	apita.Get("/get-ta-report-mockup/", controller.GetReportMockUp)
-	apita.Get("/get-ta-report-web/", controller.GetReportWeb)
-	apita.Get("/get-ta-report-mobile/", controller.GetReportMobile)
-	apita.Post("/checkin", controller.CheckIn)
-	apita.Post("/checkout", controller.CheckOut)
+	jguard := v1.Group("/jguard")
+	jguard.Get("/status", controller.CheckStatusHandler)
+	jguard.Get("/report", controller.GetReportHandler)
+	jguard.Post("/checkin", controller.CheckInHandler)
+	jguard.Post("/checkout", controller.CheckOutHandler)
 	//
+	jcenter := v1.Group("/jcenter")
+	jcenter.Get("/report/", controller.GetReportWeb)
 	//
 
 }

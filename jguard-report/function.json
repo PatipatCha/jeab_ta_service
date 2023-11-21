@@ -5,8 +5,9 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
+      "route":"v1/jguard/report",
       "methods": [
-        "post"
+        "get"
       ]
     },
     {

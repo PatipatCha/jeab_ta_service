@@ -1,9 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"log"
 	"os"
 
 	"github.com/PatipatCha/jeab_ta_service/app/model"
@@ -12,21 +9,8 @@ import (
 )
 
 func GetReportWeb(c *fiber.Ctx) error {
-	// var taReportList = []model.TimeAttendanceReportList{}
-	var ta = []model.TimeAttendanceDashboardList{}
-	// var ta []model.TimeAttendanceEntity
-	// userId := c.Params("userId")
 	_ = c.Query("month")
 	userId := c.Query("user_id")
-	resValidate, _ := services.VaildateUserId(userId)
-	if !resValidate {
-		output := model.TimeAttendanceDashboardForWebResponse{
-			UserId:  userId,
-			Data:    ta,
-			Message: os.Getenv("VAILD_USERID_NOT_FOUND"),
-		}
-		return c.JSON(output)
-	}
 
 	findUserId := c.Query("find_user_id")
 	data, _ := services.GetReportForWeb(findUserId)
@@ -43,15 +27,6 @@ func GetReportWeb(c *fiber.Ctx) error {
 func GetReportMobile(c *fiber.Ctx) error {
 	var taReportList = []model.TimeAttendanceReportList{}
 	userId := c.Query("user_id")
-	resValidate, _ := services.VaildateUserId(userId)
-	if !resValidate {
-		output := model.TimeAttendanceReportForMobileResponse{
-			UserId:  userId,
-			Data:    taReportList,
-			Message: os.Getenv("VAILD_USERID_NOT_FOUND"),
-		}
-		return c.JSON(output)
-	}
 
 	month := c.Query("month")
 	_, data, msg := services.GetReportForMobile(userId, month)
@@ -70,35 +45,22 @@ func GetReportMobile(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-func GetReportMockUp(c *fiber.Ctx) error {
+func GetReportHandler(c *fiber.Ctx) error {
+	var taReportList = []model.TimeAttendanceReportList{}
 	userId := c.Query("user_id")
-	var ta_report = []model.TimeAttendanceReportList{}
-	content, err := ioutil.ReadFile("./app/json/record_mockup_test_mobile.json")
-	if err != nil {
-		log.Fatal("Error when opening file: ", err)
+	month := c.Query("month")
+	_, data, msg := services.GetReportJGuard(userId, month)
+	if len(data) > 0 {
+		taReportList = services.RecordListJGuard(data)
+	} else {
+		msg = os.Getenv("NO_RECORD_LISTS")
 	}
 
-	err = json.Unmarshal(content, &ta_report)
-
-	// return ta_report
-
-	// var taReportList = []model.TimeAttendanceReportList{}
-
-	var res = model.TimeAttendanceReportForMobileResponse{
-		UserId:  userId,
-		Data:    ta_report,
-		Message: "mockup",
+	var res = fiber.Map{
+		"user_id": userId,
+		"message": msg,
+		"data":    taReportList,
 	}
 
 	return c.JSON(res)
 }
-
-// for _, taParam := range ta {
-// 	// fmt.Println(integ, " = ", spell.CheckInAT)
-// 	taModel := model.TimeAttendance{CheckInDate: taParam.CheckInAT, CheckInPlace: taParam.CheckInPlace, CheckInTime: taParam.CheckInAT, CheckOutTime: taParam.CheckOutAt, CheckOutPlace: taParam.CheckOutPlace}
-// }
-
-// a := model.TimeAttendanceResponse{user_id: "", Message: "", list: taModel}
-
-// bytes, _ := json.Marshal(ta)
-// fmt.Println(string())

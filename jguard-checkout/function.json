@@ -5,8 +5,9 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
+      "route":"v1/jguard/checkout",
       "methods": [
-        "get"
+        "post"
       ]
     },
     {

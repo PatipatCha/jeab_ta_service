@@ -5,15 +5,11 @@ import (
 
 	"github.com/PatipatCha/jeab_ta_service/app/databases"
 	"github.com/PatipatCha/jeab_ta_service/app/model"
+	"gorm.io/gorm"
 )
 
-type CRUDService interface {
-	SaveData(request model.TimeAttendanceCheckInOutRequest) (model.TimeAttendanceEntity, error)
-	GetReportForMobile() model.TimeAttendanceReportList
-	GetReportForWeb(findUserId string) ([]model.TimeAttendanceDashboardList, string)
-}
+func SaveData(request model.TimeAttendanceCheckInOutRequest) model.TimeAttendanceEntity {
 
-func SaveData(request model.TimeAttendanceCheckInOutRequest) (model.TimeAttendanceEntity, error) {
 	entity := model.TimeAttendanceEntity{
 		UserId:        string(request.UserId),
 		CheckDateTime: string(request.CheckDateTime),
@@ -27,17 +23,16 @@ func SaveData(request model.TimeAttendanceCheckInOutRequest) (model.TimeAttendan
 
 	db, err := databases.ConnectTADB()
 	if err != nil {
-		return entity, err
+		return entity
 	}
 
-	err = db.Table("time_attendance").Create(&entity).Scan(&entity).Error
+	db.Table("time_attendance").Create(&entity).Scan(&entity)
 
-	// err = db.Table("time_attendance").Find("user_id").Error
-
-	return entity, err
+	return entity
 }
 
 func GetReportForMobile(user_id string, month string) (bool, []model.TimeAttendanceReportMobileEntity, string) {
+
 	var ta_entity = []model.TimeAttendanceReportMobileEntity{}
 	var msg = "Record Lists"
 
@@ -73,7 +68,7 @@ func GetReportForMobile(user_id string, month string) (bool, []model.TimeAttenda
 }
 
 func GetReportForWeb(findUserId string) ([]model.TimeAttendanceDashboardList, string) {
-
+	var db *gorm.DB
 	var ta_dashboard = []model.TimeAttendanceDashboardList{}
 
 	db, err := databases.ConnectTADB()
@@ -98,32 +93,36 @@ func GetReportForWeb(findUserId string) ([]model.TimeAttendanceDashboardList, st
 	return ta_dashboard, "Get Record List"
 }
 
-// func GetReportNow() model.TimeAttendanceReportList {
-// 	var ta_report = model.TimeAttendanceReportList{}
-// 	content, err := ioutil.ReadFile("./app/json/record_mockup_test_mobile.json")
-// 	if err != nil {
-// 		log.Fatal("Error when opening file: ", err)
-// 	}
+func GetReportJGuard(user_id string, month string) (bool, []model.TimeAttendanceReportMobileEntity, string) {
 
-// 	err = json.Unmarshal(content, &ta_report)
+	var ta_entity = []model.TimeAttendanceReportMobileEntity{}
+	var msg = "Record Lists"
 
-// 	return ta_report
-// }
+	db, err := databases.ConnectTADB()
+	if err != nil {
+		return false, ta_entity, string(err.Error())
+	}
 
-// func GetReport(c *fiber.Ctx) error {
-// 	var ta []model.TimeAttendanceEntity
-// 	db, err := databases.ConnectDB()
-// 	if err != nil {
-// 		return err
-// 	}
+	//SQL RAW SELECT
+	var sqlRawWhereMonth = "AND EXTRACT( MONTH FROM a.check_date_time ) = EXTRACT( MONTH FROM LOCALTIMESTAMP AT TIME ZONE 'utc+7' ) "
+	if month != "" {
+		sqlRawWhereMonth = "AND EXTRACT( MONTH FROM a.check_date_time ) = ? "
+	}
 
-// 	// userId := c.Params("userId")
-// 	res := db.Table("time_attendance").Find(&ta).Error
-// 	if err := res; err != nil {
-// 		return err
-// 	}
+	sqlRawSelectPlace := "SELECT DATE (a.check_date_time) AS date, a.project_place AS project_place, TO_CHAR(a.check_date_time, 'HH24:MI') AS check_in_time, TO_CHAR(b.check_date_time, 'HH24:MI') AS check_out_time, CASE WHEN EXTRACT( DAY FROM a.check_date_time) != EXTRACT( DAY FROM b.check_date_time) THEN TO_CHAR(b.check_date_time, 'YYYY-MM-DD') ELSE '' END AS check_out_remark "
+	_ = ",FLOOR(EXTRACT(EPOCH FROM b.check_date_time::timestamp - a.check_date_time::timestamp)/3600)::int2 AS total_hour, ABS(EXTRACT( MINUTE FROM a.check_date_time) + EXTRACT( MINUTE FROM b.check_date_time)) AS total_minute "
+	sqlRawSelectB := ",a.check_date_time AS check_in_date_time,b.check_date_time AS check_out_date_time "
+	sqlRawFrom := "FROM time_attendance a,time_attendance b "
+	sqlRawWhereUserId := "WHERE a.user_id = ? "
+	sqlRawWhere := "AND a.check_status = 'checkin' AND b.check_status = 'checkout' AND a.ref_id = b.ref_id "
+	sqlRawOrderBy := "ORDER BY a.check_date_time DESC"
+	var sqlRaw = sqlRawSelectPlace + sqlRawSelectB + sqlRawFrom + sqlRawWhereUserId + sqlRawWhere + sqlRawWhereMonth + sqlRawOrderBy
 
-// 	println()
+	if month != "" {
+		db.Raw(sqlRaw, user_id, month).Scan(&ta_entity)
+	} else {
+		db.Raw(sqlRaw, user_id).Scan(&ta_entity)
+	}
 
-// 	return c.JSON(ta)
-// }
+	return true, ta_entity, msg
+}

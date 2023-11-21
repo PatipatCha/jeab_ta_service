@@ -17,11 +17,11 @@ type TimeAttendanceEntity struct {
 }
 
 type TimeAttendanceReportMobileEntity struct {
-	Date           string `db:"date" json:"date"`
-	ProjectPlace   string `db:"project_place" json:"project_place"`
-	CheckInTime    string `db:"check_in_time" json:"check_in_time"`
-	CheckOutTime   string `db:"check_out_time" json:"check_out_time"`
-	CheckOutRemark string `db:"check_out_remark" json:"check_out_remark"`
-	TotalHour      string `db:"total_hour" json:"total_hour"`
-	TotalMinute    string `db:"total_minute" json:"total_minute"`
+	Date             string `db:"date" json:"date"`
+	ProjectPlace     string `db:"project_place" json:"project_place"`
+	CheckInTime      string `db:"check_in_time" json:"check_in_time"`
+	CheckOutTime     string `db:"check_out_time" json:"check_out_time"`
+	CheckOutRemark   string `db:"check_out_remark" json:"check_out_remark"`
+	CheckInDateTime  string `db:"check_in_date_time" json:"check_in_date_time"`
+	CheckOutDateTime string `db:"check_out_date_time" json:"check_out_date_time"`
 }

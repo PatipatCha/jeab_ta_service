@@ -3,6 +3,6 @@
     "azureFunctions.projectLanguage": "Custom",
     "azureFunctions.projectRuntime": "~4",
     "debug.internalConsoleOptions": "neverOpen",
-    "thunder-client.saveToWorkspace": true,
-    "thunder-client.customLocation": "$HOME/projects/japitest/thunder-tests"
+    "thunder-client.saveToWorkspace": false,
+    "thunder-client.customLocation": "/Users/patipat/JEAB/Project/tc-data/thunder-tests"
 }

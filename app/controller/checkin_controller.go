@@ -8,44 +8,27 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func CheckIn(c *fiber.Ctx) error {
+func CheckInHandler(c *fiber.Ctx) error {
 	var checkStatus = "checkin"
-	// var res model.TimeAttendanceEntity
 	var request model.TimeAttendanceCheckInOutRequest
 	if err := c.BodyParser(&request); err != nil {
 		return err
 	}
 
 	userId := request.UserId
-	resValidate, _ := services.VaildateUserId(userId)
-	if !resValidate {
-		output := model.TimeAttendanceReportForMobileResponse{
-			UserId:  userId,
-			Data:    []model.TimeAttendanceReportList{},
-			Message: os.Getenv("VAILD_USERID_NOT_FOUND"),
-		}
-		return c.JSON(output)
-	}
-
 	resValidate, resTA, resValidateMsg := services.VaildateCheckStatus(userId, "", checkStatus)
 	if !resValidate {
-
 		output := fiber.Map{
 			"message": resValidateMsg,
-			"user_id": request.UserId,
+			"user_id": userId,
 			"data":    resTA,
 		}
-
 		return c.JSON(output)
 	}
 
 	request.CheckStatus = checkStatus
 	request.RefId = services.StringWithCharset(userId, request.ProjectId)
-	// request.RefId = uuid.New().String() + "-" + userId
-	res, err := services.SaveData(request)
-	if err != nil {
-		return err
-	}
+	res := services.SaveData(request)
 
 	output := fiber.Map{
 		"message": os.Getenv("SAVE_CHECKIN_SUCCESS"),
@@ -56,7 +39,7 @@ func CheckIn(c *fiber.Ctx) error {
 	return c.JSON(output)
 }
 
-func CheckOut(c *fiber.Ctx) error {
+func CheckOutHandler(c *fiber.Ctx) error {
 	var checkStatus = "checkout"
 	var data = []model.TimeAttendanceReportList{}
 	var request model.TimeAttendanceCheckInOutRequest
@@ -75,16 +58,6 @@ func CheckOut(c *fiber.Ctx) error {
 		return c.JSON(output)
 	}
 
-	resValidate, _ := services.VaildateUserId(userId)
-	if !resValidate {
-		output := model.TimeAttendanceReportForMobileResponse{
-			UserId:  userId,
-			Data:    data,
-			Message: os.Getenv("VAILD_USERID_NOT_FOUND"),
-		}
-		return c.JSON(output)
-	}
-
 	resValidate, resTA, resValidateMsg := services.VaildateCheckStatus(userId, refId, checkStatus)
 	if !resValidate {
 		output := fiber.Map{
@@ -97,15 +70,33 @@ func CheckOut(c *fiber.Ctx) error {
 	}
 
 	request.CheckStatus = checkStatus
-	res, err := services.SaveData(request)
-	if err != nil {
-		return err
-	}
+	res := services.SaveData(request)
 
 	output := fiber.Map{
 		"message": os.Getenv("SAVE_CHECKOUT_SUCCESS"),
 		"user_id": request.UserId,
 		"data":    res,
+	}
+
+	return c.JSON(output)
+}
+
+func CheckStatusHandler(c *fiber.Ctx) error {
+	userId := c.Query("user_id")
+	output := fiber.Map{
+		"message": "CheckIn Screen",
+		"user_id": userId,
+		"data":    fiber.Map{},
+	}
+	data, err := services.CheckStatus(userId)
+	if err != nil {
+		output["message"] = os.Getenv("DB_CONNECT_ERROR")
+		return c.JSON(output)
+	}
+
+	if data.CheckStatus != "checkout" {
+		output["message"] = "CheckOut Screen"
+		output["data"] = data
 	}
 
 	return c.JSON(output)

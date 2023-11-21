@@ -22,6 +22,10 @@ func main() {
 
 	initLoadPort(app)
 
+	// databases.ConnectAccountDB()
+
+	// databases.ConnectTADB()
+
 }
 
 func initLoadEnv() {

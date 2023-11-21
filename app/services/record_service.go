@@ -6,16 +6,11 @@ import (
 	"io/ioutil"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/PatipatCha/jeab_ta_service/app/model"
 )
-
-type RecordService interface {
-	FindMonth(month string) string
-	thaiMonthName(month int, monthtype string) string
-	RecordListForMobile(input []model.TimeAttendanceReportMobileEntity) []model.TimeAttendanceReportList
-}
 
 func FindMonth(month string) model.MonthDefine {
 	var output = model.MonthDefine{}
@@ -53,7 +48,42 @@ func RecordListForMobile(input []model.TimeAttendanceReportMobileEntity) []model
 			CheckInTime:    input[index].CheckInTime,
 			CheckOutTime:   input[index].CheckOutTime,
 			CheckOutRemark: remark,
-			Total:          input[index].TotalHour + " ชั่วโมง " + input[index].TotalMinute + " นาที",
+			Total:          input[index].CheckInDateTime + " ชั่วโมง " + input[index].CheckOutDateTime + " นาที",
+		}
+
+		list = append(list, newEntry)
+
+	}
+
+	return list
+}
+
+func RecordListJGuard(input []model.TimeAttendanceReportMobileEntity) []model.TimeAttendanceReportList {
+	var list []model.TimeAttendanceReportList
+
+	for index, _ := range input {
+		t, _ := time.Parse(time.RFC3339, input[index].Date)
+
+		dayStr := strconv.Itoa(t.Day())
+
+		monthInt := int(t.Month())
+		thaiMonth := thaiMonthName(monthInt, "short")
+
+		remark, _ := formatDateInThai(input[index].CheckOutRemark)
+
+		var work, _ = CalculateTotalWorkingHours(input[index].CheckInDateTime, input[index].CheckOutDateTime)
+		hour, minute, _ := ExtractHoursAndMinutes(work)
+
+		total := hour + " ชั่วโมง " + minute + " นาที"
+
+		newEntry := model.TimeAttendanceReportList{
+			Day:            dayStr,
+			Month:          thaiMonth,
+			ProjectPlace:   input[index].ProjectPlace,
+			CheckInTime:    input[index].CheckInTime,
+			CheckOutTime:   input[index].CheckOutTime,
+			CheckOutRemark: remark,
+			Total:          total,
 		}
 
 		list = append(list, newEntry)
@@ -102,90 +132,59 @@ func formatDateInThai(inputDate string) (string, error) {
 	return result, nil
 }
 
-// func MapReportForMobile(entity []model.TimeAttendanceReportMobileEntity) []model.TimeAttendanceReportList {
-// 	res := []model.TimeAttendanceReportList{}
-// 	_ = model.Date{}
-// 	_ = []model.List{}
+func FormatDuration(duration time.Duration) string {
+	// Round the duration to the nearest second
+	roundedDuration := duration.Round(time.Second)
 
-// 	_ = model.Date{}
-// var listObj = &model.List{}
+	hours := int(roundedDuration.Hours())
+	minutes := int((roundedDuration - time.Duration(hours)*time.Hour).Minutes())
 
-// for index, _ := range entity {
-// 	dateEntity := entity[index].Date
-// 	trimmed := strings.Trim(dateEntity, "T00:00:00Z")
-// 	t, _ := time.Parse("2006-01-02", trimmed)
-// 	print(t.String())
+	fmt.Print(hours)
 
-// for i := 0; i < 10; i++ {
-// 	book.Categories = append(book.Categories, Category{
-// 		Id:   10,
-// 		Name: "Vanaraj",
-// 	})
-// }
+	var result string
+	if hours > 0 {
+		result += fmt.Sprintf("%02d:", hours)
+	}
 
-// }
+	result += fmt.Sprintf("%02d", minutes)
 
-// return res
-// for indexB, _ := range entity {
+	return result
+}
 
-// 	listObj.CheckInTime = ""
-// 	listObj.CheckOutTime = ""
-// 	listObj.CheckOutRemark = entity[index].CheckOutRemark
-// 	listObj.ProjectPlace = ""
-// 	listObj.Total = ""
-// }
+func CalculateTotalWorkingHours(startTime, endTime string) (string, error) {
+	// Parse input strings into time.Time objects
+	startTimeObj, err := time.Parse(time.RFC3339, startTime)
+	if err != nil {
+		return "", fmt.Errorf("error parsing start time: %v", err)
+	}
 
-// &date{
-// 	"Date":  entity[index].Date,
-// 	"Month": entity[index].Date,
-// }
+	endTimeObj, err := time.Parse(time.RFC3339, endTime)
+	if err != nil {
+		return "", fmt.Errorf("error parsing end time: %v", err)
+	}
 
-// lists := model.List{
-// 	ProjectPlace:   entity[index].ProjectPlace,
-// 	CheckInTime:    entity[index].CheckInTime,
-// 	CheckOutTime:   entity[index].CheckOutTime,
-// 	CheckOutRemark: entity[index].CheckOutRemark,
-// 	Total:          entity[index].TotalHour + " ชั่วโมง " + entity[index].TotalMinute + " นาที",
-// }
+	// Check that start time is before end time
+	if startTimeObj.After(endTimeObj) {
+		return "", fmt.Errorf("start time must be before end time")
+	}
 
-// fmt.Println(lists)
+	// Calculate working hours
+	workingHours := endTimeObj.Sub(startTimeObj)
 
-// var model = model.TimeAttendanceReportList{
-// 	Date:  dateObj,
-// 	Lists: []model.List{},
-// }
+	// Format workingHours as "HH:MM"
+	workingHoursFormatted := fmt.Sprintf("%02d:%02d", int(workingHours.Hours()), int(workingHours.Minutes())%60)
 
-// dateModel = append(final.Date, model.Date{
-// 	{
-// 		Date:  strconv.Itoa(t.Day()),
-// 		Month: t.Month().String(),
-// 	}
-// })
+	return workingHoursFormatted, nil
+}
 
-// model := fiber.Map{
-// 	"Date": dateObj,
-// 	"List": []model.List{},
-// }
+func ExtractHoursAndMinutes(workingHoursString string) (string, string, error) {
+	parts := strings.Split(workingHoursString, ":")
+	if len(parts) != 2 {
+		return "", "", fmt.Errorf("invalid format for working hours string")
+	}
 
-// res = model.TimeAttendanceReportList{Date: date, Lists: lists}
+	hours := parts[0]
+	minutes := parts[1]
 
-// date := model.Date{
-// 	Day: ,
-
-// }
-// list := model.List{
-// 	ProjectPlace:   "",
-// 	CheckInTime:    "",
-// 	CheckOutTime:   "",
-// 	CheckOutRemark: "",
-// 	Total:          "",
-// }
-
-// var res = []model.TimeAttendanceReportList{
-// 	Date:  dateObj,
-// 	Lists: []model.List{},
-// }
-
-// res := []model.TimeAttendanceReportList{}
-
-// }
+	return hours, minutes, nil
+}

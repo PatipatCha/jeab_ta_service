@@ -5,6 +5,7 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
+      "route":"v1/jguard/status",
       "methods": [
         "get"
       ]
