@@ -19,6 +19,7 @@ func SaveData(request model.TimeAttendanceCheckInOutRequest) model.TimeAttendanc
 		CreatedBy:     request.CreatedBy,
 		ImageUrl:      request.ImageUrl,
 		RefId:         request.RefId,
+		SeocId:        request.SeocId,
 	}
 
 	db, err := databases.ConnectTADB()
@@ -67,7 +68,7 @@ func GetReportForMobile(user_id string, month string) (bool, []model.TimeAttenda
 
 }
 
-func GetReportForWeb(findUserId string) ([]model.TimeAttendanceDashboardList, string) {
+func GetReportForWeb(findUserId string, fincSeocId string) ([]model.TimeAttendanceDashboardList, string) {
 	var db *gorm.DB
 	var ta_dashboard = []model.TimeAttendanceDashboardList{}
 
@@ -76,18 +77,20 @@ func GetReportForWeb(findUserId string) ([]model.TimeAttendanceDashboardList, st
 		return ta_dashboard, "Database Not Connected"
 	}
 
-	sqlRawA := "SELECT a.user_id AS \"user_id\", a.project_place AS \"project_place\", TO_CHAR( a.check_date_time :: DATE, 'dd-mm-yyyy' ) AS \"check_in_date\", a.image_url AS \"check_in_image\", TO_CHAR(a.check_date_time, 'HH24:MI') AS \"check_in_time\", TO_CHAR( b.check_date_time :: DATE, 'dd-mm-yyyy' ) AS \"check_out_date\", TO_CHAR(b.check_date_time, 'HH24:MI') AS \"check_out_time\", b.image_url AS \"check_out_image\" FROM time_attendance a, time_attendance b "
-	sqlRawB := "WHERE a.check_status = 'checkin' AND b.check_status = 'checkout' AND a.ref_id = b.ref_id "
+	sqlRawA := "SELECT a.user_id AS \"user_id\", a.project_place AS \"project_place\", TO_CHAR( a.check_date_time :: DATE, 'dd-mm-yyyy' ) AS \"check_in_date\", a.image_url AS \"check_in_image\", TO_CHAR(a.check_date_time, 'HH24:MI') AS \"check_in_time\", TO_CHAR( b.check_date_time :: DATE, 'dd-mm-yyyy' ) AS \"check_out_date\", TO_CHAR(b.check_date_time, 'HH24:MI') AS \"check_out_time\", b.image_url AS \"check_out_image\" "
+	sqlFrom := "FROM time_attendance a, time_attendance b "
+	sqlWhere := "WHERE a.check_status = 'checkin' AND b.check_status = 'checkout' AND a.ref_id = b.ref_id "
 	_ = "AND EXTRACT( MONTH FROM a.check_date_time ) = EXTRACT( MONTH FROM LOCALTIMESTAMP AT TIME ZONE 'utc+7' ) "
-	sqlRawC := "AND a.user_id = ? "
-	sqlRawD := "ORDER BY a.check_date_time DESC"
+	sqlWhereUser := "AND a.user_id = ? "
+	sqlWhereSeoc := "AND a.seoc_id = ? "
+	sqlOrder := "ORDER BY a.check_date_time DESC"
 
-	var sqlRaw = sqlRawA + sqlRawB + sqlRawD
+	var sqlRaw = sqlRawA + sqlFrom + sqlWhere + sqlWhereSeoc + sqlOrder
 	if findUserId != "" {
-		sqlRaw = sqlRawA + sqlRawB + sqlRawC + sqlRawD
+		sqlRaw = sqlRawA + sqlFrom + sqlWhere + sqlWhereUser + sqlWhereSeoc + sqlOrder
 		db.Raw(sqlRaw, findUserId).Scan(&ta_dashboard)
 	} else {
-		db.Raw(sqlRaw).Scan(&ta_dashboard)
+		db.Raw(sqlRaw, fincSeocId).Scan(&ta_dashboard)
 	}
 
 	return ta_dashboard, "Get Record List"

@@ -9,6 +9,7 @@ type TimeAttendanceCheckInOutRequest struct {
 	CheckStatus   string `json:"check_status"`
 	CreatedBy     string `json:"created_by"`
 	RefId         string `json:"ref_id"`
+	SeocId        string `json:"seoc_id"`
 }
 
 type TimeAttendanceStatus struct {

@@ -10,7 +10,8 @@ type TimeAttendanceEntity struct {
 	ProjectId     string `db:"project_id" json:"project_id"`
 	ProjectPlace  string `db:"project_place" json:"project_place"`
 	CheckDateTime string `db:"check_date_time" json:"check_date_time"`
-	ImageUrl      string `db:"image_url"`
+	ImageUrl      string `db:"image_url" json:"image_url"`
+	SeocId        string `db:"seoc_id" json:"seoc_id"`
 	CheckStatus   string `db:"check_status" json:"check_status"`
 	CreatedBy     string `db:"created_by" json:"created_by"`
 	RefId         string `db:"ref_id" json:"ref_id"`

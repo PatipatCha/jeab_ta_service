@@ -11,9 +11,10 @@ import (
 func GetReportWeb(c *fiber.Ctx) error {
 	_ = c.Query("month")
 	userId := c.Query("user_id")
+	seocId := c.Query("seoc_id")
 
 	findUserId := c.Query("find_user_id")
-	data, _ := services.GetReportForWeb(findUserId)
+	data, _ := services.GetReportForWeb(findUserId, seocId)
 
 	var res = model.TimeAttendanceDashboardForWebResponse{
 		UserId:  userId,

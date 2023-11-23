@@ -82,11 +82,22 @@ func CheckOutHandler(c *fiber.Ctx) error {
 }
 
 func CheckStatusHandler(c *fiber.Ctx) error {
+
 	userId := c.Query("user_id")
+	if userId == "" {
+		output := fiber.Map{
+			"message": "UserId is Null",
+			"user_id": userId,
+			"data":    fiber.Map{},
+		}
+		return c.JSON(output)
+	}
+
 	output := fiber.Map{
-		"message": "CheckIn Screen",
-		"user_id": userId,
-		"data":    fiber.Map{},
+		"message":        "CheckIn Screen",
+		"user_id":        userId,
+		"status_type_id": 10001,
+		"data":           fiber.Map{},
 	}
 	data, err := services.CheckStatus(userId)
 	if err != nil {
@@ -96,6 +107,7 @@ func CheckStatusHandler(c *fiber.Ctx) error {
 
 	if data.CheckStatus != "checkout" {
 		output["message"] = "CheckOut Screen"
+		output["status_type_id"] = 10002
 		output["data"] = data
 	}
 
